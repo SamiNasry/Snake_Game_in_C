@@ -11,16 +11,17 @@
 #define SCREEN_HEIGHT 480
 #define GRID_SIZE 20
 #define SNAKE_INITIAL_LENGTH 4 
+#define MAX_SNAKE_LENGTH (SCREEN_WIDTH / GRID_SIZE) * (SCREEN_HEIGHT / GRID_SIZE)
 
 
-typdef struct {
+typedef struct {
 	int x;
 	int y;
 } Point;
 
 typedef struct {
-	Point* point;
-	int lenght;
+	Point* body;
+	int length;
 	int direction; /* 0 : up , 1: right , 2: down , 3: left */
 } Snake;
 
@@ -82,6 +83,29 @@ int main()
 
 bool init_game()
 {
+	srand(time(NULL));
+
+	snake.body = malloc(sizeof(Point) * MAX_SNAKE_LENGTH);
+	if (snake.body == NULL)
+	{
+		printf("Failed to allocate memory for snake body\n");
+		return false;
+	}
+
+	snake.length = SNAKE_INITIAL_LENGTH;
+	snake.direction = 1;
+
+	for (int i = 0; i < snake.length; i++)
+	{
+		snake.body[i].x = (SCREEN_WIDTH / 2) - i * GRID_SIZE;
+		snake.body[i].y = SCREEN_HEIGHT / 2;
+	}
+	
+	food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
+	food.y = (rand() % (CREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
+
+	return true;
+
 
 }
 
