@@ -168,14 +168,59 @@ void handle_events()
 
 void update_game()
 {
-	
+	Point new_head = snake.body[0];
+
+	switch (snake.direction) {
+		case 0: new_head.y -= GRID_SIZE; break;
+		case 1: new_head.x += GRID_SIZE; break;
+		case 2: new_head.y += GRID_SIZE; break;
+		case 3: new_head.x -= GRID_SIZE; break;
+	}
+
+	if (new_head.x < 0 || new_head.x >= SCREEN_WIDTH || new_head.y < 0 || new_head.y >= SCREEN_WIDTH)
+	{
+		game_over= true;
+		return;
+	}
+
+	if (new_head.x == food.x && new_head.y == food.y)
+	{
+		if (snake.length < MAX_SNAKE_LENGTH)
+		{
+			snake.length++;
+		}
+		food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
+		food.y = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
+	} else {
+		for (int i = snake.length - 1; i > 0 ; i++)
+		{
+			snake.body[i] = snake.body[i-1];
+		}
+	}
+
+	snake.body[0] = new_head;
+
 }
 
 
+void render()
+{
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
 
+	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+	for (int i = 0; i < snake.length; i++)
+	{
+		SDL_Rect rect = {snake.body[i].x, snake.body[i].y, GRID_SIZE, GRID_SIZE};
+		SDL_RenderFillRect(renderer, &rect);
+	}
 
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	SDL_Rect food_rect = {food.x, food.y, GRID_SIZE, GRID_SIZE};
+	SDL_RenderFillRect(renderer, &food_rect);
 
-
+	SDL_RenderPresent(renderer);
+}
 
 
 
