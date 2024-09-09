@@ -97,17 +97,92 @@ bool init_game()
 
 	for (int i = 0; i < snake.length; i++)
 	{
-		snake.body[i].x = (SCREEN_WIDTH / 2) - i * GRID_SIZE;
+		snake.body[i].x = (SCREEN_WIDTH / 2) - (i * GRID_SIZE);
 		snake.body[i].y = SCREEN_HEIGHT / 2;
 	}
 	
 	food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
-	food.y = (rand() % (CREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
+	food.y = (rand() % (SCREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
 
 	return true;
 
 
 }
+
+void cleanup()
+{
+	if (snake.body != NULL)
+	{
+		free(snake.body);
+		snake.body = NULL;
+	}
+	
+	if (render != NULL)
+	{
+		SDL_DestroyRenderer(renderer);
+		renderer = NULL;
+	}
+
+	if (window != NULL)
+	{
+		SDL_DestroyWindow(window);
+		window = NULL;
+	}
+
+	SDL_Quit();
+}
+
+void handle_events()
+{
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		if (event.type == SDL_QUIT)
+		{
+			game_over = true;
+		} else if (event.type == SDL_KEYDOWN)
+		{
+			switch (event.key.keysym.sym)
+			{
+				case SDLK_UP:
+					if (snake.direction != 2) snake.direction = 0;
+					break;
+				case SDLK_RIGHT:
+					if (snake.direction != 3) snake.direction = 1;
+				case SDLK_DOWN:
+					if (snake.direction != 0) snake.direction = 2;
+					break;
+				case SDLK_LEFT:
+					if (snake.direction != 1) snake.direction = 3;
+					break;
+			}
+		}
+
+
+
+	}
+
+}
+
+
+
+void update_game()
+{
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
