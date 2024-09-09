@@ -117,7 +117,7 @@ void cleanup()
 		snake.body = NULL;
 	}
 	
-	if (render != NULL)
+	if (renderer != NULL)
 	{
 		SDL_DestroyRenderer(renderer);
 		renderer = NULL;
@@ -183,16 +183,37 @@ void update_game()
 		return;
 	}
 
+	for(int i = 1; i < snake.length ; i++)
+	{
+		if (new_head.x == snake.body[i].x && new_head.y == snake.body[i].y)
+		{
+			game_over = true;
+			return;
+		}
+	}
+
 	if (new_head.x == food.x && new_head.y == food.y)
 	{
 		if (snake.length < MAX_SNAKE_LENGTH)
 		{
+			Point* new_body = realloc(snake.body, sizeof(Point) * (snake.length + 1));
+			if (new_body == NULL)
+			{
+				printf("Failed to generate new body \n");
+				game_over = true;
+				return;
+			}
+			snake.body = new_body;
 			snake.length++;
+		}
+		else {
+			game_over = true;
+			return;
 		}
 		food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
 		food.y = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
 	} else {
-		for (int i = snake.length - 1; i > 0 ; i++)
+		for (int i = snake.length - 1; i > 0 ; i--)
 		{
 			snake.body[i] = snake.body[i-1];
 		}
