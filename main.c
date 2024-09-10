@@ -43,7 +43,7 @@ void cleanup(void);
 void handle_events(void);
 void update_game(void);
 void render(void);
-
+void generate_food(void);
 
 int main()
 {
@@ -90,7 +90,7 @@ int main()
 
 bool init_game()
 {
-	srand(time(NULL));
+	
 
 	snake.body = malloc(sizeof(Square) * MAX_SNAKE_LENGTH);
 	if (snake.body == NULL)
@@ -107,14 +107,33 @@ bool init_game()
 		snake.body[i].x = (SCREEN_WIDTH / 2) - (i * GRID_SIZE);
 		snake.body[i].y = SCREEN_HEIGHT / 2;
 	}
-	
-	// Don't get this down part but it's not important now
-	food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
-	food.y = (rand() % (SCREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
+
+	generate_food();
 
 	return true;
 
 
+}
+
+void generate_food()
+{
+	srand(time(NULL));
+	bool valid_position = false;
+	while(!valid_position)
+	{
+		food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
+		food.y = (rand() % (SCREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
+		
+		valid_position = true;
+		for (int i = 0; i < snake.length ; i++)
+		{
+			if (food.x == snake.body[i].x && food.y == snake.body[i].y)
+			{
+				valid_position = false;
+				break;
+			}
+		}
+	}
 }
 
 void cleanup()
@@ -188,7 +207,7 @@ void update_game()
 
 	if (new_head.x < 0 || new_head.x >= SCREEN_WIDTH || new_head.y < 0 || new_head.y >= SCREEN_HEIGHT)
 	{
-		printf("Game Over");
+		printf("Game Over, Out of bound. x : %d , y : %d" , new_head.x , new_head.y);
 		game_over= true;
 		return;
 	}
@@ -197,7 +216,7 @@ void update_game()
 	{
 		if (new_head.x == snake.body[i].x && new_head.y == snake.body[i].y)
 		{
-			printf("Collision with the snake");
+			printf("Collision with itself. x : %d , y : %d" , new_head.x, new_head.y);
 			game_over = true;
 			return;
 		}
