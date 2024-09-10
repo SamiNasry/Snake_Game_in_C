@@ -1,3 +1,6 @@
+// Soemthing make the game_over turn true, I need to figure it out //
+
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
@@ -9,26 +12,29 @@
 
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
-#define GRID_SIZE 20
-#define SNAKE_INITIAL_LENGTH 4 
-#define MAX_SNAKE_LENGTH (SCREEN_WIDTH / GRID_SIZE) * (SCREEN_HEIGHT / GRID_SIZE)
+#define GRID_SIZE 20 // In Pixels
+#define SNAKE_INITIAL_LENGTH 4 // In Points Squares)
+#define MAX_SNAKE_LENGTH (SCREEN_WIDTH / GRID_SIZE) * (SCREEN_HEIGHT / GRID_SIZE) // Snake to take all of the screen (You win here)
 
 
 typedef struct {
 	int x;
 	int y;
-} Point;
+} Square; 
 
 typedef struct {
-	Point* body;
+	Square* body;
 	int length;
 	int direction; /* 0 : up , 1: right , 2: down , 3: left */
 } Snake;
 
+
+// Create SDL Window + Renderer 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+
 Snake snake;
-Point food;
+Square food;
 bool game_over = false;
 
 
@@ -74,6 +80,7 @@ int main()
 		handle_events();
 		update_game();
 		render();
+		printf("%d", game_over);
 		SDL_Delay(100);
 	}
 	
@@ -85,7 +92,7 @@ bool init_game()
 {
 	srand(time(NULL));
 
-	snake.body = malloc(sizeof(Point) * MAX_SNAKE_LENGTH);
+	snake.body = malloc(sizeof(Square) * MAX_SNAKE_LENGTH);
 	if (snake.body == NULL)
 	{
 		printf("Failed to allocate memory for snake body\n");
@@ -101,6 +108,7 @@ bool init_game()
 		snake.body[i].y = SCREEN_HEIGHT / 2;
 	}
 	
+	// Don't get this down part but it's not important now
 	food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
 	food.y = (rand() % (SCREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
 
@@ -149,6 +157,7 @@ void handle_events()
 					break;
 				case SDLK_RIGHT:
 					if (snake.direction != 3) snake.direction = 1;
+					break;
 				case SDLK_DOWN:
 					if (snake.direction != 0) snake.direction = 2;
 					break;
@@ -168,7 +177,7 @@ void handle_events()
 
 void update_game()
 {
-	Point new_head = snake.body[0];
+	Square new_head = snake.body[0];
 
 	switch (snake.direction) {
 		case 0: new_head.y -= GRID_SIZE; break;
@@ -177,8 +186,9 @@ void update_game()
 		case 3: new_head.x -= GRID_SIZE; break;
 	}
 
-	if (new_head.x < 0 || new_head.x >= SCREEN_WIDTH || new_head.y < 0 || new_head.y >= SCREEN_WIDTH)
+	if (new_head.x < 0 || new_head.x >= SCREEN_WIDTH || new_head.y < 0 || new_head.y >= SCREEN_HEIGHT)
 	{
+		printf("Game Over");
 		game_over= true;
 		return;
 	}
@@ -187,6 +197,7 @@ void update_game()
 	{
 		if (new_head.x == snake.body[i].x && new_head.y == snake.body[i].y)
 		{
+			printf("Collision with the snake");
 			game_over = true;
 			return;
 		}
@@ -196,7 +207,7 @@ void update_game()
 	{
 		if (snake.length < MAX_SNAKE_LENGTH)
 		{
-			Point* new_body = realloc(snake.body, sizeof(Point) * (snake.length + 1));
+			Square* new_body = realloc(snake.body, sizeof(Square) * (snake.length + 1));
 			if (new_body == NULL)
 			{
 				printf("Failed to generate new body \n");
@@ -212,7 +223,7 @@ void update_game()
 		}
 		food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
 		food.y = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
-	} else {
+	} else { // Move the snake forward
 		for (int i = snake.length - 1; i > 0 ; i--)
 		{
 			snake.body[i] = snake.body[i-1];
