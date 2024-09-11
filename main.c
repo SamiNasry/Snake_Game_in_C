@@ -1,4 +1,4 @@
-// Soemthing make the game_over turn true, I need to figure it out //
+// When going down and then left very fast game crash //
 
 
 #include <SDL2/SDL.h>
@@ -74,7 +74,7 @@ int main()
 		cleanup();
 		return 1;
 	}
-
+	// Game Loop
 	while (!game_over)
 	{
 		handle_events();
@@ -88,6 +88,8 @@ int main()
 	return  0;
 }
 
+
+// Game Initialization
 bool init_game()
 {
 	
@@ -99,15 +101,16 @@ bool init_game()
 		return false;
 	}
 
-	snake.length = SNAKE_INITIAL_LENGTH;
-	snake.direction = 1;
+	snake.length = SNAKE_INITIAL_LENGTH; // Snake Initial Length
+	snake.direction = 1; // Sanke start going to the right 
 
 	for (int i = 0; i < snake.length; i++)
 	{
 		snake.body[i].x = (SCREEN_WIDTH / 2) - (i * GRID_SIZE);
 		snake.body[i].y = SCREEN_HEIGHT / 2;
 	}
-
+	
+	// Generate First Food
 	generate_food();
 
 	return true;
@@ -125,9 +128,13 @@ void generate_food()
 		food.y = (rand() % (SCREEN_HEIGHT / GRID_SIZE)) * GRID_SIZE;
 		
 		valid_position = true;
+
+		if (food.x >= SCREEN_WIDTH || food.y >= SCREEN_HEIGHT)
+			valid_position = false;
+		
 		for (int i = 0; i < snake.length ; i++)
 		{
-			if (food.x == snake.body[i].x && food.y == snake.body[i].y)
+			if (food.x == snake.body[i].x && food.y == snake.body[i].y )
 			{
 				valid_position = false;
 				break;
@@ -240,8 +247,9 @@ void update_game()
 			game_over = true;
 			return;
 		}
-		food.x = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
-		food.y = (rand() % (SCREEN_WIDTH / GRID_SIZE)) * GRID_SIZE;
+		
+		generate_food();
+		
 	} else { // Move the snake forward
 		for (int i = snake.length - 1; i > 0 ; i--)
 		{
