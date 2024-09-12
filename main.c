@@ -15,7 +15,7 @@
 #define GRID_SIZE 20 // In Pixels
 #define SNAKE_INITIAL_LENGTH 4 // In Points Squares)
 #define MAX_SNAKE_LENGTH (SCREEN_WIDTH / GRID_SIZE) * (SCREEN_HEIGHT / GRID_SIZE) // Snake to take all of the screen (You win here)
-
+#define MAX_QUEUE_SIZE 16
 
 typedef struct {
 	int x;
@@ -28,6 +28,13 @@ typedef struct {
 	int direction; /* 0 : up , 1: right , 2: down , 3: left */
 } Snake;
 
+typedef struct {
+	int directions[MAX_QUEUE_SIZE];
+	int front;
+	int rear;
+	int size;
+} InputQueue;
+
 
 // Create SDL Window + Renderer 
 SDL_Window* window = NULL;
@@ -35,6 +42,7 @@ SDL_Renderer* renderer = NULL;
 
 Snake snake;
 Square food;
+InputQueue inputQueue;
 bool game_over = false;
 
 
@@ -44,6 +52,12 @@ void handle_events(void);
 void update_game(void);
 void render(void);
 void generate_food(void);
+void init_queue(InputQueue* queue);
+bool is_queue_empty(InputQueue* queue);
+bool is_queue_full(InputQueue* queue);
+void enqueue(InputQueue* queue, int direction);
+int dequeue(InputQueue* queue);
+
 
 int main()
 {
@@ -89,6 +103,44 @@ int main()
 }
 
 
+void init_queue(InputQueue* queue)
+{
+	queue->front = 0;
+	queue->rear = -1;
+	queue->size = 0;
+}
+
+
+bool is_queue_empty(InputQueue* queue)
+{
+	return queue->size == 0;
+}
+
+bool is_queue_full(InputQueue* queue)
+{
+	return queue->size == MAX_QUEUE_SIZE;
+}
+
+void enqueue(InputQueue* queue, int direction)
+{
+	if (is_queue_full(queue)) return;
+
+	queue->rear = (queue->rear +1) % MAX_QUEUE_SIZE;
+	queue->directions[queue->rear] = direction;
+	queue->size++;
+}
+
+int dequeue(InputQueue* queue)
+{
+	if (is_queue_empty(queue)) return -1;
+
+	int direction = queue->directions[queue->front];
+	queue->front = (queue->front + 1) % MAX_QUEUE_SIZE;
+	queue->size--;
+	return direction;
+}
+
+
 // Game Initialization
 bool init_game()
 {
@@ -112,6 +164,8 @@ bool init_game()
 	
 	// Generate First Food
 	generate_food();
+
+	init_queue(&inputQueue);
 
 	return true;
 
@@ -176,30 +230,29 @@ void handle_events()
 			game_over = true;
 		} else if (event.type == SDL_KEYDOWN)
 		{
+			int new_direction = -1;
 			switch (event.key.keysym.sym)
 			{
 				case SDLK_UP:
-					if (snake.direction != 2) snake.direction = 0;
+					if (snake.direction != 2) new_direction = 0;
 					break;
 				case SDLK_RIGHT:
-					if (snake.direction != 3) snake.direction = 1;
+					if (snake.direction != 3) new_direction = 1;
 					break;
 				case SDLK_DOWN:
-					if (snake.direction != 0) snake.direction = 2;
+					if (snake.direction != 0) new_direction = 2;
 					break;
 				case SDLK_LEFT:
-					if (snake.direction != 1) snake.direction = 3;
+					if (snake.direction != 1) new_direction = 3;
 					break;
 			}
+
+			if (new_direction != -1 && !is_queue_full(&inputQueue)) {
+				enqueue(&inputQueue, new_direction);
+			}
 		}
-
-
-
 	}
-
 }
-
-
 
 void update_game()
 {
