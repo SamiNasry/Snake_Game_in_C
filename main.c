@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -256,6 +257,26 @@ void handle_events()
 
 void update_game()
 {
+	static Uint32 last_update_time = 0;
+	Uint32 current_time = SDL_GetTicks();
+	if (current_time - last_update_time < 100)
+	{
+		return;
+	}
+
+	last_update_time = current_time;
+
+
+	if(!is_queue_empty(&inputQueue))
+	{
+		int new_direction = dequeue(&inputQueue);
+
+		if ((new_direction + 2) % 4 != snake.direction)
+		{
+			snake.direction = new_direction;
+		}
+	}
+
 	Square new_head = snake.body[0];
 
 	switch (snake.direction) {
