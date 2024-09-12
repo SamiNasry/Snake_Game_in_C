@@ -1,4 +1,4 @@
-// When going down and then left very fast game crash //
+// Seems good for now, I need to add score track and special fruits + maange the file better it's getting long and messy // 
 
 
 #include <SDL2/SDL.h>
@@ -95,7 +95,6 @@ int main()
 		handle_events();
 		update_game();
 		render();
-		printf("%d", game_over);
 		SDL_Delay(100);
 	}
 	
@@ -259,7 +258,7 @@ void update_game()
 {
 	static Uint32 last_update_time = 0;
 	Uint32 current_time = SDL_GetTicks();
-	if (current_time - last_update_time < 100)
+	if (current_time - last_update_time < 50)
 	{
 		return;
 	}
