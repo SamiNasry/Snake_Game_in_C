@@ -10,5 +10,5 @@ gcc main.c -o snake -lSDL
 To execute the game
 
 ```
-/snake
+./snake
 ```
